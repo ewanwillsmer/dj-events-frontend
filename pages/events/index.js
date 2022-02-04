@@ -16,8 +16,9 @@ export default function EventsPage({ events }) {
 }
 
 export async function getStaticProps() {
-  const res = await fetch(`${API_URL}/api/events`);
-  const events = await res.json();
+  const res = await fetch(`${API_URL}/api/events?populate=*&_sort=date:ASC`);
+  const json = await res.json();
+  const events = json.data;
 
   return {
     props: { events },
