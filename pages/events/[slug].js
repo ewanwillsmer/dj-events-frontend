@@ -6,7 +6,6 @@ import { API_URL } from "@/config/index";
 import styles from "@/styles/Event.module.css";
 
 export default function EventPage({ evt }) {
-  console.log({ evt });
   const { attributes } = evt;
   const deleteEvent = (e) => {
     console.log(e);
@@ -31,7 +30,7 @@ export default function EventPage({ evt }) {
           {attributes.time}
         </span>
         <h1>{attributes.name}</h1>
-        {attributes.image && (
+        {attributes.image.data && (
           <div className={styles.image}>
             <Image
               src={attributes.image.data.attributes.formats.medium.url}
@@ -73,7 +72,7 @@ export async function getStaticPaths() {
   // { fallback: false } means other routes should 404.
   return {
     paths,
-    fallback: true,
+    fallback: false,
   };
 }
 
@@ -81,7 +80,16 @@ export async function getStaticPaths() {
 export async function getStaticProps({ params: { slug } }) {
   // params contains the event `slug`.
   // If the route is like /events/he, then params.slug is he
-  const res = await fetch(`${API_URL}/api/events?slug=${slug}&populate=*`);
+
+  const qs = require("qs");
+  const query = qs.stringify({
+    filters: {
+      slug: {
+        $eq: slug,
+      },
+    },
+  });
+  const res = await fetch(`${API_URL}/api/events?${query}&populate=*`);
   const json = await res.json();
   const events = json.data;
 
