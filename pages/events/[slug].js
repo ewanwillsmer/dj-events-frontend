@@ -4,11 +4,29 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import { API_URL } from "@/config/index";
 import styles from "@/styles/Event.module.css";
+import { useRouter } from "next/router";
+
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function EventPage({ evt }) {
+  const router = useRouter();
   const { attributes } = evt;
-  const deleteEvent = (e) => {
-    console.log(e);
+
+  const deleteEvent = async (e) => {
+    if (confirm("Are you sure?")) {
+      // Sends a delete req to Strapi
+      const res = await fetch(`${API_URL}/api/events/${evt.id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message);
+      } else {
+        router.push("/events");
+      }
+    }
   };
 
   return (
@@ -30,6 +48,7 @@ export default function EventPage({ evt }) {
           {attributes.time}
         </span>
         <h1>{attributes.name}</h1>
+        <ToastContainer />
         {attributes.image.data && (
           <div className={styles.image}>
             <Image
