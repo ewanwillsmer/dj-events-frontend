@@ -1,3 +1,7 @@
 {
-  "jshint.options": { "esversion": 6 }
+  "jshint.options": {
+    "esversion": 6
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }

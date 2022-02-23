@@ -8,6 +8,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "axios": "^0.26.0",
+    "cookie": "^0.4.2",
     "moment": "^2.29.1",
     "next": "12.0.10",
     "qs": "^6.10.3",

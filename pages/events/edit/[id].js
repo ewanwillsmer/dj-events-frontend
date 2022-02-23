@@ -200,7 +200,7 @@ export default function EditEventsPage({ evt }) {
 }
 
 // retrieves the event information that we need to fill the form values
-export async function getServerSideProps({ params: { id } }) {
+export async function getServerSideProps({ params: { id }, req}) {
   const qs = require("qs");
   const query = qs.stringify({
     filters: {
@@ -212,6 +212,8 @@ export async function getServerSideProps({ params: { id } }) {
   const res = await fetch(`${API_URL}/api/events?${query}&populate=*`);
   const json = await res.json();
   const evt = json.data[0];
+  
+  console.log(req.headers.cookie)
 
   return {
     props: {
