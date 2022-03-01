@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { parseCookies } from "@/helpers/index";
 import Layout from "@/components/Layout";
 import Modal from "@/components/Modal";
 import ImageUpload from "@/components/ImageUpload";
@@ -12,7 +13,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
 
-export default function EditEventsPage({ evt }) {
+export default function EditEventsPage({ evt, token }) {
   const { attributes } = evt;
 
   // Set values from the specific event's details
@@ -54,15 +55,19 @@ export default function EditEventsPage({ evt }) {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(data),
     });
     if (!res.ok) {
+      if (res.status === 403 || res.status === 401) {
+        toast.error("Unauthorised");
+        return;
+      }
       toast.error("Something Went Wrong");
       return;
     } else {
-      const response = await res.json();
-      const evt = response.data.attributes;
+      const evt = await res.json();
       router.push(`/events/${evt.slug}`);
     }
   };
@@ -193,14 +198,20 @@ export default function EditEventsPage({ evt }) {
       </div>
 
       <Modal show={showModal} onClose={() => setShowModal(false)}>
-        <ImageUpload evtId={evt.id} imageUploaded={imageUploaded} />
+        <ImageUpload
+          evtId={evt.id}
+          imageUploaded={imageUploaded}
+          token={token}
+        />
       </Modal>
     </Layout>
   );
 }
 
 // retrieves the event information that we need to fill the form values
-export async function getServerSideProps({ params: { id }, req}) {
+export async function getServerSideProps({ params: { id }, req }) {
+  const { token } = parseCookies(req);
+
   const qs = require("qs");
   const query = qs.stringify({
     filters: {
@@ -212,12 +223,11 @@ export async function getServerSideProps({ params: { id }, req}) {
   const res = await fetch(`${API_URL}/api/events?${query}&populate=*`);
   const json = await res.json();
   const evt = json.data[0];
-  
-  console.log(req.headers.cookie)
 
   return {
     props: {
       evt,
+      token,
     },
   };
 }
